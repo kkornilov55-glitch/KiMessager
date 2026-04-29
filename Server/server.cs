@@ -10,7 +10,7 @@ namespace Server
         {
             int port = 6767;
             TcpListener server = new TcpListener(IPAddress.Any, port);
-
+            TcpClient client = new TcpClient();
             try
             {
                 //1. Запуск сервера
@@ -20,7 +20,7 @@ namespace Server
                 while (true)
                 {
                     //2. Ожидание подключения пользователя, программа на паузе
-                    TcpClient client = server.AcceptTcpClient();
+                    client = server.AcceptTcpClient();
 
                     //3. После подключения клиента выводим сообщение об этом
                     Console.WriteLine("\nКлиент подключен!");
@@ -31,20 +31,37 @@ namespace Server
 
                     //5. Корзина для полученного сообщения в байтовом представлении
                     byte[] buffer = new byte[256];
-                    //Принятие сообщения со сбором его в "корзину"
-                    int bufferCount = stream.Read(buffer, 0, buffer.Length);
+                    while (true)
+                    {
+                        //Принятие сообщения со сбором его в "корзину"
+                        int bufferCount = stream.Read(buffer, 0, buffer.Length);
 
-                    //6. Перевод сообщения из списка байтов в понятный нам текст 
-                    string message = Encoding.UTF8.GetString(buffer, 0, bufferCount);
-                    //Вывод полученного сообщения
-                    Console.WriteLine($"Получено сообщение: {message}");
-
-                    client.Close();
+                        if (bufferCount == 0)
+                        {
+                            Console.WriteLine("-------------------------------------");
+                            Console.WriteLine("Клиент отключился!");
+                            break;
+                        }
+                            
+                        //6. Перевод сообщения из списка байтов в понятный нам текст 
+                        string message = Encoding.UTF8.GetString(buffer, 0, bufferCount);
+                        //Вывод полученного сообщения
+                        Console.WriteLine($"Получено сообщение: {message}");
+                    }
                 }
+            }
+            catch (IOException ex) when (ex.InnerException is SocketException)
+            {
+                Console.WriteLine("-------------------------------------");
+                Console.WriteLine("Соединение разорвано!");
             }
             catch (Exception ex)
             {
                 Console.WriteLine("Ошибка: " + ex.Message);
+            }
+            finally
+            {
+                client.Close();
             }
         }
     }
