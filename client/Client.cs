@@ -16,6 +16,7 @@ namespace client
                 Console.WriteLine("Попытка подключения: {0}:{1}", ip, port);
                 client.Connect(ip, port);
                 Console.WriteLine("Подключено!");
+                Console.WriteLine("-------------------------------------");
 
                 while (true)
                 {
@@ -23,6 +24,7 @@ namespace client
                     string message = Console.ReadLine();
                     if (string.IsNullOrEmpty(message))
                     {
+                        Console.WriteLine("-------------------------------------");
                         Console.Write("Разрыв соединения...");
                         break;
                     }
